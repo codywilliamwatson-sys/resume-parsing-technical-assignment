@@ -37,7 +37,6 @@ GEMINI_API_KEY=your-api-key-here
 
 ```python
 from src.framework import ResumeParserFramework
-from src.parsers import PDFParser
 from src.extractors import ResumeExtractor, NameExtractor, EmailExtractor, SkillsExtractor
 from src.llm import GeminiLLM
 
@@ -54,11 +53,8 @@ extractors = {
 # Create resume extractor
 resume_extractor = ResumeExtractor(extractors, llm)
 
-# Create PDF parser
-pdf_parser = PDFParser()
-
-# Create framework
-framework = ResumeParserFramework(pdf_parser, resume_extractor)
+# Create framework (parser automatically selected based on file extension)
+framework = ResumeParserFramework(resume_extractor)
 
 # Parse resume
 resume_data = framework.parse_resume('path/to/resume.pdf')
@@ -72,7 +68,6 @@ print(f"Skills: {resume_data.skills}")
 
 ```python
 from src.framework import ResumeParserFramework
-from src.parsers import WordParser
 from src.extractors import ResumeExtractor, NameExtractor, EmailExtractor, SkillsExtractor
 from src.llm import GeminiLLM
 
@@ -89,11 +84,8 @@ extractors = {
 # Create resume extractor
 resume_extractor = ResumeExtractor(extractors, llm)
 
-# Create Word parser
-word_parser = WordParser()
-
-# Create framework
-framework = ResumeParserFramework(word_parser, resume_extractor)
+# Create framework (parser automatically selected based on file extension)
+framework = ResumeParserFramework(resume_extractor)
 
 # Parse resume
 resume_data = framework.parse_resume('path/to/resume.docx')

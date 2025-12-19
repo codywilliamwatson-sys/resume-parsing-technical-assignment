@@ -8,7 +8,6 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from src.framework import ResumeParserFramework
-from src.parsers import WordParser
 from src.extractors import ResumeExtractor, NameExtractor, EmailExtractor, SkillsExtractor
 from src.llm import GeminiLLM
 
@@ -28,11 +27,8 @@ def main():
     # Create resume extractor
     resume_extractor = ResumeExtractor(extractors, llm)
     
-    # Create Word parser
-    word_parser = WordParser()
-    
-    # Create framework
-    framework = ResumeParserFramework(word_parser, resume_extractor)
+    # Create framework (parser will be automatically selected based on file extension)
+    framework = ResumeParserFramework(resume_extractor)
     
     # Get path to sample resume
     examples_dir = Path(__file__).parent
