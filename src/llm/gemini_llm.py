@@ -4,10 +4,13 @@ Handles interaction with Google's Gemini API.
 """
 
 import os
+import logging
 from typing import Optional
 import google.genai as genai
 
 from .llm_interface import LLMInterface
+
+logger = logging.getLogger(__name__)
 
 
 class GeminiLLM(LLMInterface):
@@ -35,6 +38,7 @@ class GeminiLLM(LLMInterface):
         
         self.client = genai.Client(api_key=self.api_key)
         self.model_name = model_name
+        logger.info(f"Initialized GeminiLLM with model: {model_name}")
     
     def generate_response(self, prompt: str, **kwargs) -> str:
         """
@@ -58,6 +62,7 @@ class GeminiLLM(LLMInterface):
         """
         self.validate_prompt(prompt)
         
+        logger.debug(f"Generating response from Gemini (model: {self.model_name}, prompt length: {len(prompt)})")
         try:
             response = self.client.models.generate_content(
                 model=self.model_name,
@@ -70,14 +75,18 @@ class GeminiLLM(LLMInterface):
                 }
             )
             
+            logger.debug(f"Received response from Gemini ({len(response.text)} characters)")
             return response.text
             
         except Exception as e:
             error_msg = str(e).lower()
             if 'api_key' in error_msg or 'api key' in error_msg or 'authentication' in error_msg or 'invalid' in error_msg and 'key' in error_msg:
+                logger.error(f"Authentication error with Gemini API: {str(e)}")
                 raise ConnectionError(f"Failed to authenticate with Gemini API: {str(e)}") from e
             elif 'network' in error_msg or 'connection' in error_msg:
+                logger.error(f"Connection error with Gemini API: {str(e)}")
                 raise ConnectionError(f"Failed to connect to Gemini API: {str(e)}") from e
             else:
+                logger.error(f"Error generating response from Gemini: {str(e)}")
                 raise RuntimeError(f"Error generating response from Gemini: {str(e)}") from e
 

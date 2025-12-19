@@ -2,10 +2,13 @@
 Resume Parser Framework that combines file parsing and field extraction.
 """
 
+import logging
 from pathlib import Path
 from ..parsers.file_parser import FileParser
 from ..extractors.resume_extractor import ResumeExtractor
 from ..models.resume import ResumeData
+
+logger = logging.getLogger(__name__)
 
 
 class ResumeParserFramework:
@@ -37,8 +40,11 @@ class ResumeParserFramework:
             ValueError: If the file format is invalid or extraction fails
             IOError: If there's an error reading the file
         """
+        logger.info(f"Starting resume parsing for file: {file_path}")
         path = Path(file_path)
         text = self.file_parser.parse(path)
+        logger.debug(f"Extracted {len(text)} characters from file")
         resume = self.resume_extractor.extract(text)
+        logger.info(f"Successfully parsed resume")
         
         return resume

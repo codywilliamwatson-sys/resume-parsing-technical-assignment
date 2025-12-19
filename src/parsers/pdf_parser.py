@@ -3,10 +3,13 @@ PDF file parser implementation.
 Handles parsing of PDF resume files.
 """
 
+import logging
 from pathlib import Path
 import pypdf
 
 from .file_parser import FileParser
+
+logger = logging.getLogger(__name__)
 
 
 class PDFParser(FileParser):
@@ -31,6 +34,7 @@ class PDFParser(FileParser):
             ValueError: If the file format is invalid or unsupported
             IOError: If there's an error reading the file
         """
+        logger.info(f"Parsing PDF file: {file_path}")
         self.validate_file(file_path)
         
         try:
@@ -41,10 +45,14 @@ class PDFParser(FileParser):
                 for page in pdf_reader.pages:
                     text_content.append(page.extract_text())
                 
-                return '\n'.join(text_content)
+                result = '\n'.join(text_content)
+                logger.info(f"Successfully parsed PDF: {len(pdf_reader.pages)} pages, {len(result)} characters extracted")
+                return result
         except pypdf.errors.PdfReadError as e:
+            logger.error(f"Invalid PDF file format: {file_path}")
             raise ValueError(f"Invalid PDF file: {file_path}") from e
         except Exception as e:
+            logger.error(f"Error reading PDF file: {file_path} - {str(e)}")
             raise IOError(f"Error reading PDF file: {file_path}") from e
     
     def can_parse(self, file_path: Path) -> bool:

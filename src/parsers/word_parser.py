@@ -3,10 +3,13 @@ Word document parser implementation.
 Handles parsing of Microsoft Word (.docx) resume files.
 """
 
+import logging
 from pathlib import Path
 from docx import Document
 
 from .file_parser import FileParser
+
+logger = logging.getLogger(__name__)
 
 
 class WordParser(FileParser):
@@ -31,6 +34,7 @@ class WordParser(FileParser):
             ValueError: If the file format is invalid or unsupported
             IOError: If there's an error reading the file
         """
+        logger.info(f"Parsing Word document: {file_path}")
         self.validate_file(file_path)
         
         try:
@@ -55,10 +59,12 @@ class WordParser(FileParser):
             if table_text:
                 all_text += '\n\n' + '\n'.join(table_text)
             
+            logger.info(f"Successfully parsed Word document: {len(text_content)} paragraphs, {len(table_text)} table rows, {len(all_text)} characters extracted")
             return all_text
         except Exception as e:
             if isinstance(e, (FileNotFoundError, ValueError)):
                 raise
+            logger.error(f"Error reading Word document: {file_path} - {str(e)}")
             raise IOError(f"Error reading Word document: {file_path}") from e
     
     def can_parse(self, file_path: Path) -> bool:

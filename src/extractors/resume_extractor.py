@@ -3,10 +3,13 @@ Resume extractor that orchestrates multiple field extractors
 to create a complete ResumeData instance.
 """
 
+import logging
 from typing import Dict, Optional
 from .field_extractor import FieldExtractor
 from ..models.resume import ResumeData
 from ..llm.llm_interface import LLMInterface
+
+logger = logging.getLogger(__name__)
 
 
 class ResumeExtractor:
@@ -28,6 +31,7 @@ class ResumeExtractor:
             raise ValueError("Extractors dictionary cannot be empty")
         self.extractors = extractors
         self.llm_interface = llm_interface
+        logger.debug(f"Initialized ResumeExtractor with {len(extractors)} field extractors")
     
     def extract(self, text: str) -> ResumeData:
         """
@@ -45,8 +49,10 @@ class ResumeExtractor:
         if not text or not isinstance(text, str) or not text.strip():
             raise ValueError("Text cannot be empty or None")
         
+        logger.info(f"Extracting fields from resume text ({len(text)} characters)")
         extracted_fields = {}
         for field_name, extractor in self.extractors.items():
+            logger.debug(f"Extracting field: {field_name}")
             extracted_value = extractor.extract(text, self.llm_interface)
             extracted_fields[field_name] = extracted_value
         
@@ -54,14 +60,17 @@ class ResumeExtractor:
         name = extracted_fields.get('name')
         if name is None:
             name = ''
+            logger.warning("Name field extraction returned None, using empty string")
         
         email = extracted_fields.get('email')
         if email is None:
             email = ''
+            logger.warning("Email field extraction returned None, using empty string")
         
         skills = extracted_fields.get('skills')
         if skills is None:
             skills = []
+            logger.warning("Skills field extraction returned None, using empty list")
         
         return ResumeData(
             name=name,
